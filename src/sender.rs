@@ -85,6 +85,6 @@ impl AudioSource for Sender {
     }
 
     fn read_opus_frame(&mut self) -> Option<Vec<u8>> {
-        unimplemented!()
+        unimplemented!("Opus is not configured");
     }
 }

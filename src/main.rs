@@ -40,27 +40,27 @@ fn main() {
     );
 
     let (ready_tx, ready_rx) = mpsc::channel();
-    // let (close_tx, close_rx) = mpsc::channel();
+    let (close_tx, close_rx) = mpsc::channel();
+    let (closed_tx, closed_rx) = mpsc::channel();
 
     let mut client =
         Client::new(&token, Handler(Arc::new(Mutex::new(ready_tx)))).expect("Err creating client");
 
     let voice_man = Arc::clone(&client.voice_manager);
-    // let shutdown_voice_manager = Arc::clone(&client.voice_manager);
+    let shutdown_voice_manager = Arc::clone(&client.voice_manager);
 
     thread::spawn(move || {
         client.start().unwrap();
     });
 
-    // thread::spawn(move || {
-    //     close_rx.recv().unwrap();
-    //     let mut voice_man_lock = shutdown_voice_manager.lock();
-    //     voice_man_lock.join(guild_id, chan_id).unwrap();
-    //     if let Some(handler) = voice_man_lock.get_mut(guild_id) {
-    //         println!("Closing");
-    //         handler.leave();
-    //     }
-    // });
+    thread::spawn(move || {
+        close_rx.recv().unwrap();
+        let mut voice_man_lock = shutdown_voice_manager.lock();
+        if let Some(handler) = voice_man_lock.get_mut(guild_id) {
+            handler.leave();
+            closed_tx.send(()).unwrap();
+        }
+    });
 
     thread::spawn(move || {
         ready_rx.recv().unwrap();
@@ -79,5 +79,7 @@ fn main() {
     stdin().read_line(&mut buf);
 
     // thread::sleep_ms(100_000);
-    // close_tx.send(()).unwrap();
+    close_tx.send(()).unwrap();
+    closed_rx.recv().unwrap();
+    println!("Disconnected");
 }
