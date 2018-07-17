@@ -2,7 +2,7 @@ extern crate cpal;
 extern crate serenity;
 
 use std::env;
-use std::io::{stdin, Read};
+use std::io::stdin;
 use std::sync::{mpsc, Arc};
 use std::thread;
 
@@ -75,7 +75,8 @@ fn main() {
         }
     });
 
-    stdin().read_to_string(&mut String::new());
+    let mut buf = String::new();
+    stdin().read_line(&mut buf);
 
     // thread::sleep_ms(100_000);
     // close_tx.send(()).unwrap();
