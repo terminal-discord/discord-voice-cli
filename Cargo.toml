@@ -7,5 +7,5 @@ authors = ["Noskcaj <kcajdev@gmail.com>"]
 cpal = "0.8.2"
 
 [dependencies.serenity]
-git = "https://github.com/Noskcaj19/serenity"
+git = "https://github.com/terminal-discord/serenity"
 features = ["cache", "voice"]
