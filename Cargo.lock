@@ -212,6 +212,7 @@ dependencies = [
 name = "discord-voice-cli"
 version = "0.1.0"
 dependencies = [
+ "clap 2.32.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "cpal 0.8.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "serenity 0.5.7 (git+https://github.com/terminal-discord/serenity)",
 ]

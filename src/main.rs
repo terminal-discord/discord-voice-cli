@@ -1,7 +1,7 @@
+extern crate clap;
 extern crate cpal;
 extern crate serenity;
 
-use std::env;
 use std::io::stdin;
 use std::sync::{mpsc, Arc};
 use std::thread;
@@ -12,6 +12,7 @@ use serenity::{
     prelude::Mutex,
 };
 
+mod args;
 mod receiver;
 mod sender;
 
@@ -25,19 +26,23 @@ impl EventHandler for Handler {
 }
 
 fn main() {
-    let token = env::var("DISCORD_TOKEN").expect("Expected a token in the environment");
-    let guild_id = GuildId(
-        env::var("DISCORD_GUILD")
-            .expect("Expected a token in the environment")
-            .parse::<u64>()
-            .expect("Invalid int"),
-    );
-    let chan_id = ChannelId(
-        env::var("DISCORD_CHANNEL")
-            .expect("Expected a token in the environment")
-            .parse::<u64>()
-            .expect("Invalid int"),
-    );
+    let args = args::get_args();
+    let token = args.token.expect("token");
+    let guild_id = args.guild_id.expect("guild");
+    let channel_id = args.channel_id.expect("channel");
+    // let token = env::var("DISCORD_TOKEN").expect("Expected a token in the environment");
+    // let guild_id = GuildId(
+    //     env::var("DISCORD_GUILD")
+    //         .expect("Expected a token in the environment")
+    //         .parse::<u64>()
+    //         .expect("Invalid int"),
+    // );
+    // let chan_id = ChannelId(
+    //     env::var("DISCORD_CHANNEL")
+    //         .expect("Expected a token in the environment")
+    //         .parse::<u64>()
+    //         .expect("Invalid int"),
+    // );
 
     let (ready_tx, ready_rx) = mpsc::channel();
     let (close_tx, close_rx) = mpsc::channel();
@@ -65,7 +70,7 @@ fn main() {
     thread::spawn(move || {
         ready_rx.recv().unwrap();
         let mut voice_man_lock = voice_man.lock();
-        voice_man_lock.join(guild_id, chan_id).unwrap();
+        voice_man_lock.join(guild_id, channel_id).unwrap();
         if let Some(handler) = voice_man_lock.get_mut(guild_id) {
             let rec = receiver::Receiver::new();
             handler.listen(Some(Box::new(rec)));
